@@ -1,6 +1,7 @@
 package be.mathiasbosman.inverterdataexport.collector.alphaess;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
@@ -30,10 +32,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 @ExtendWith(MockitoExtension.class)
-class AlphaessDataCollectorTest {
+class AlphaessCollectorTest {
 
   @Mock
   private RestTemplate restTemplate;
@@ -42,7 +45,7 @@ class AlphaessDataCollectorTest {
 
   private static final String TIME_ZONE = "Europe/Brussels";
   private static final String MOCK_TOKEN = "123";
-  private AlphaessDataCollector alphaessDataCollector;
+  private AlphaessCollector alphaessCollector;
 
   @BeforeEach
   void initService() throws MalformedURLException {
@@ -51,21 +54,21 @@ class AlphaessDataCollectorTest {
     endpoints.setAuthentication("/auth");
     endpoints.setDailyStats("/stats");
     alphaessProperties.setEndpoints(endpoints);
-    alphaessDataCollector = new AlphaessDataCollector(restTemplate, alphaessProperties);
+    alphaessCollector = new AlphaessCollector(restTemplate, alphaessProperties);
   }
 
   @Test
   void buildUri() throws URISyntaxException {
-    assertThat(alphaessDataCollector.buildUri("bar")).isEqualTo(new URI("https://foo/bar"));
+    assertThat(alphaessCollector.buildUri("bar")).isEqualTo(new URI("https://foo/bar"));
   }
 
   @Test
   void authentication() {
     mockAuth();
 
-    alphaessDataCollector.authenticate(new LoginRequestDto("foo", "bar"));
+    alphaessCollector.authenticate(new LoginRequestDto("foo", "bar"));
 
-    assertThat(alphaessDataCollector.getOrRefreshAccessToken()).isNotNull();
+    assertThat(alphaessCollector.getOrRefreshAccessToken()).isNotNull();
   }
 
   @Test
@@ -75,7 +78,7 @@ class AlphaessDataCollectorTest {
 
     LoginRequestDto loginRequestDto = new LoginRequestDto("foo", "bar");
     assertThrows(ExporterException.class,
-        () -> alphaessDataCollector.authenticate(loginRequestDto));
+        () -> alphaessCollector.authenticate(loginRequestDto));
   }
 
   @Test
@@ -85,19 +88,19 @@ class AlphaessDataCollectorTest {
 
     LoginRequestDto loginRequestDto = new LoginRequestDto("foo", "bar");
     assertThrows(ExporterException.class,
-        () -> alphaessDataCollector.authenticate(loginRequestDto));
+        () -> alphaessCollector.authenticate(loginRequestDto));
   }
 
   @Test
   void buildNoneAuthHeaders() {
-    HttpHeaders httpHeaders = alphaessDataCollector.buildHeaders(null);
+    HttpHeaders httpHeaders = alphaessCollector.buildHeaders(null);
 
     assertHttpHeaders(httpHeaders, null);
   }
 
   @Test
   void buildAuthHeaders() {
-    HttpHeaders httpHeaders = alphaessDataCollector.buildHeaders(MOCK_TOKEN);
+    HttpHeaders httpHeaders = alphaessCollector.buildHeaders(MOCK_TOKEN);
 
     assertHttpHeaders(httpHeaders, "Bearer " + MOCK_TOKEN);
   }
@@ -127,12 +130,12 @@ class AlphaessDataCollectorTest {
         .tokenCreateTime(new Date())
         .build();
 
-    assertThat(alphaessDataCollector.isTokenValid(null)).isFalse();
-    assertThat(alphaessDataCollector.isTokenValid(missingToken)).isFalse();
-    assertThat(alphaessDataCollector.isTokenValid(expiresInIsZero)).isFalse();
-    assertThat(alphaessDataCollector.isTokenValid(expiresInIsNegative)).isFalse();
-    assertThat(alphaessDataCollector.isTokenValid(creationTimeIsNull)).isFalse();
-    assertThat(alphaessDataCollector.isTokenValid(validToken)).isTrue();
+    assertThat(alphaessCollector.isTokenValid(null)).isFalse();
+    assertThat(alphaessCollector.isTokenValid(missingToken)).isFalse();
+    assertThat(alphaessCollector.isTokenValid(expiresInIsZero)).isFalse();
+    assertThat(alphaessCollector.isTokenValid(expiresInIsNegative)).isFalse();
+    assertThat(alphaessCollector.isTokenValid(creationTimeIsNull)).isFalse();
+    assertThat(alphaessCollector.isTokenValid(validToken)).isTrue();
   }
 
   @Test
@@ -144,7 +147,7 @@ class AlphaessDataCollectorTest {
         .thenReturn(response);
     LocalDate today = LocalDate.now();
 
-    Optional<PvStatistics> stats = alphaessDataCollector.getTotalPv("sn", today);
+    Optional<PvStatistics> stats = alphaessCollector.getTotalPv("sn", today);
     assertThat(stats).isNotEmpty();
     assertThat(stats.get().getPvTotal()).isEqualTo(50);
     assertThat(stats.get().getDate()).isEqualTo(today);
@@ -156,7 +159,7 @@ class AlphaessDataCollectorTest {
     when(restTemplate.postForObject(any(), any(), eq(SticsByPeriodResponseEntity.class)))
         .thenReturn(null);
 
-    assertThat(alphaessDataCollector.getTotalPv("123", LocalDate.now())).isEmpty();
+    assertThat(alphaessCollector.getTotalPv("123", LocalDate.now())).isEmpty();
   }
 
   @Test
@@ -167,14 +170,14 @@ class AlphaessDataCollectorTest {
     when(restTemplate.postForObject(any(), any(), eq(SticsByPeriodResponseEntity.class)))
         .thenReturn(sticsByPeriodResponseEntity);
 
-    assertThat(alphaessDataCollector.getTotalPv("123", LocalDate.now())).isEmpty();
+    assertThat(alphaessCollector.getTotalPv("123", LocalDate.now())).isEmpty();
   }
 
   @Test
   void getOrRefreshAccessTokenFirstRun() {
     mockAuth();
 
-    String token = alphaessDataCollector.getOrRefreshAccessToken();
+    String token = alphaessCollector.getOrRefreshAccessToken();
 
     assertThat(token).isEqualTo(MOCK_TOKEN);
   }
@@ -183,8 +186,8 @@ class AlphaessDataCollectorTest {
   void getOrRefreshAccessTokenExistingToken() {
     mockAuth();
 
-    String firstToken = alphaessDataCollector.getOrRefreshAccessToken();
-    String secondToken = alphaessDataCollector.getOrRefreshAccessToken();
+    String firstToken = alphaessCollector.getOrRefreshAccessToken();
+    String secondToken = alphaessCollector.getOrRefreshAccessToken();
 
     assertThat(firstToken)
         .isEqualTo(secondToken)
@@ -210,7 +213,29 @@ class AlphaessDataCollectorTest {
 
   @Test
   void getTimeZone() {
-    assertThat(alphaessDataCollector.getZoneId()).isEqualTo(ZoneId.of(TIME_ZONE));
+    assertThat(alphaessCollector.getZoneId()).isEqualTo(ZoneId.of(TIME_ZONE));
+  }
+
+  @Test
+  void setGridCharging() {
+    mockAuth();
+    when(restTemplate.postForEntity(any(), any(), any()))
+        .thenReturn(ResponseEntity.ok().build());
+
+    assertDoesNotThrow(() -> alphaessCollector.setGridCharging("123", LocalTime.of(1, 0),
+        LocalTime.of(2, 0), 20));
+  }
+
+  @Test
+  void setGridChargingFails() {
+    mockAuth();
+    when(restTemplate.postForEntity(any(), any(), any()))
+        .thenReturn(ResponseEntity.internalServerError().build());
+
+    LocalTime time = LocalTime.now();
+    assertThrows(ExporterException.class,
+        () -> alphaessCollector.setGridCharging("123", time,
+            time, 20));
   }
 
   private void assertHttpHeaders(HttpHeaders headers, String authorisation) {

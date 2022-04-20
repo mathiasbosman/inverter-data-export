@@ -10,16 +10,16 @@ import java.time.LocalDateTime;
  * Dto to post to the AlphaESS to retrieve statistics.
  */
 public record StatisticsRequestDto(
-    @JsonFormat(pattern = AlphaessProperties.DATE_FORMAT_PATTERN)
     @JsonProperty("beginDay")
+    @JsonFormat(pattern = AlphaessProperties.DATE_FORMAT_PATTERN)
     LocalDateTime beginDay,
 
-    @JsonFormat(pattern = AlphaessProperties.DATE_FORMAT_PATTERN)
     @JsonProperty("endDay")
+    @JsonFormat(pattern = AlphaessProperties.DATE_FORMAT_PATTERN)
     LocalDateTime endDay,
 
-    @JsonFormat(pattern = AlphaessProperties.DATE_FORMAT_PATTERN)
     @JsonProperty("tDay")
+    @JsonFormat(pattern = AlphaessProperties.DATE_FORMAT_PATTERN)
     LocalDate today,
 
     @JsonProperty("isOEM")
@@ -33,5 +33,9 @@ public record StatisticsRequestDto(
 
     @JsonProperty("noLoading")
     boolean noLoading) {
+
+    public StatisticsRequestDto(LocalDateTime begin, LocalDateTime end, String sn) {
+        this(begin, end, LocalDate.now(), 0, sn, "", true);
+    }
 
 }

@@ -3,6 +3,7 @@ package be.mathiasbosman.inverterdataexport.collector;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import be.mathiasbosman.inverterdataexport.PvStatisticStub;
+import be.mathiasbosman.inverterdataexport.domain.DataCollector;
 import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import java.time.LocalDate;
 import java.time.ZoneId;

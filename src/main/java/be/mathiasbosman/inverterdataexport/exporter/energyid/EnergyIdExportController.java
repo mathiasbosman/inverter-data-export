@@ -1,6 +1,6 @@
 package be.mathiasbosman.inverterdataexport.exporter.energyid;
 
-import be.mathiasbosman.inverterdataexport.exporter.ExportService;
+import be.mathiasbosman.inverterdataexport.domain.ExportService;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

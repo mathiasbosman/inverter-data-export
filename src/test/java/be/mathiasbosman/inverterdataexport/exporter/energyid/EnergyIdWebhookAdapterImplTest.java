@@ -25,10 +25,10 @@ import org.springframework.web.client.RestTemplate;
 @ExtendWith(MockitoExtension.class)
 class EnergyIdWebhookAdapterImplTest {
 
-  private final EnergyIdProperties energyIdProperties = new EnergyIdProperties();
   @Mock
   private RestTemplate restTemplate;
   private EnergyIdWebhookAdapterImpl webhookAdapter;
+  private final EnergyIdProperties energyIdProperties = new EnergyIdProperties();
 
   @Captor
   private ArgumentCaptor<URI> uriArgumentCaptor;
@@ -48,7 +48,7 @@ class EnergyIdWebhookAdapterImplTest {
 
     webhookAdapter.postReadings(readingsDto);
 
-    verify(restTemplate, times(1)).postForLocation(uriArgumentCaptor.capture(),
+    verify(restTemplate).postForLocation(uriArgumentCaptor.capture(),
         httpEntityArgumentCaptor.capture());
 
     assertThat(uriArgumentCaptor.getValue()).isEqualTo(energyIdProperties.getSecretUri());

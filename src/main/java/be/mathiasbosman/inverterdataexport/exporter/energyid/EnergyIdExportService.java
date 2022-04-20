@@ -1,8 +1,8 @@
 package be.mathiasbosman.inverterdataexport.exporter.energyid;
 
-import be.mathiasbosman.inverterdataexport.collector.DataCollector;
+import be.mathiasbosman.inverterdataexport.domain.DataCollector;
+import be.mathiasbosman.inverterdataexport.domain.ExportService;
 import be.mathiasbosman.inverterdataexport.domain.ExporterException;
-import be.mathiasbosman.inverterdataexport.exporter.ExportService;
 import be.mathiasbosman.inverterdataexport.exporter.energyid.EnergyIdProperties.EnergyIdMeter;
 import be.mathiasbosman.inverterdataexport.exporter.energyid.dto.MeterReadingsDto;
 import be.mathiasbosman.inverterdataexport.util.DateUtils;

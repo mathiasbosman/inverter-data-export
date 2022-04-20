@@ -1,4 +1,4 @@
-package be.mathiasbosman.inverterdataexport.exporter;
+package be.mathiasbosman.inverterdataexport.domain;
 
 import java.net.URI;
 import org.springframework.http.HttpEntity;

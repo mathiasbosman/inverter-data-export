@@ -12,23 +12,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import be.mathiasbosman.inverterdataexport.AbstractControllerTest;
 import be.mathiasbosman.inverterdataexport.PvStatisticStub;
-import be.mathiasbosman.inverterdataexport.collector.DataCollector;
+import be.mathiasbosman.inverterdataexport.domain.DataCollector;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 class DataControllerTest extends AbstractControllerTest {
 
-  @MockBean
+  @SpyBean
   private DataCollector dataCollector;
 
   @Test
   void getPvStats() throws Exception {
     LocalDate date = LocalDate.now();
 
-    mvc.perform(get("/rest/statistics/pv/foo/" + date));
+    mvc.perform(get("/rest/data/statistics/pv/foo/" + date));
 
     ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<LocalDate> dateArgumentCaptor = ArgumentCaptor.forClass(LocalDate.class);
@@ -43,7 +43,7 @@ class DataControllerTest extends AbstractControllerTest {
     when(dataCollector.getTotalPv(any(), eq(today)))
         .thenReturn(Optional.of(new PvStatisticStub(today, 5.0)));
 
-    mvc.perform(get("/rest/statistics/pv/foo/" + today))
+    mvc.perform(get("/rest/data/statistics/pv/foo/" + today))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.date", equalTo(today.toString())))
         .andExpect(jsonPath("$.pvTotal", equalTo(5.0)));
@@ -54,7 +54,7 @@ class DataControllerTest extends AbstractControllerTest {
     when(dataCollector.getTotalPv(any(), any()))
         .thenReturn(Optional.empty());
 
-    mvc.perform(get("/rest/statistics/pv/foo/" + LocalDate.now()))
+    mvc.perform(get("/rest/data/statistics/pv/foo/" + LocalDate.now()))
         .andExpect(status().isNoContent());
   }
 }

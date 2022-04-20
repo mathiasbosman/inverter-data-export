@@ -1,6 +1,5 @@
-package be.mathiasbosman.inverterdataexport.collector;
+package be.mathiasbosman.inverterdataexport.domain;
 
-import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;

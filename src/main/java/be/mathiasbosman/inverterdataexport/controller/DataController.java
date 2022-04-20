@@ -1,6 +1,6 @@
 package be.mathiasbosman.inverterdataexport.controller;
 
-import be.mathiasbosman.inverterdataexport.collector.DataCollector;
+import be.mathiasbosman.inverterdataexport.domain.DataCollector;
 import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/rest")
+@RequestMapping("/rest/data")
 public class DataController {
 
   private final DataCollector dataCollector;

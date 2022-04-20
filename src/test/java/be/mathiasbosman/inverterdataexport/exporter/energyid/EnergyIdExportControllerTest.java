@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import be.mathiasbosman.inverterdataexport.AbstractControllerTest;
-import be.mathiasbosman.inverterdataexport.exporter.ExportService;
+import be.mathiasbosman.inverterdataexport.domain.ExportService;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

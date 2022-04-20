@@ -1,12 +1,14 @@
 package be.mathiasbosman.inverterdataexport.collector.alphaess;
 
 import be.mathiasbosman.inverterdataexport.collector.AbstractDataCollector;
+import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.EssSettingRequestDto;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.LoginRequestDto;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.dto.StatisticsRequestDto;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResponseEntity;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.LoginResponseEntity.LoginData;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.SticsByPeriodResponseEntity;
 import be.mathiasbosman.inverterdataexport.collector.alphaess.response.SticsByPeriodResponseEntity.Statistics;
+import be.mathiasbosman.inverterdataexport.domain.BatteryService;
 import be.mathiasbosman.inverterdataexport.domain.ExporterException;
 import be.mathiasbosman.inverterdataexport.domain.PvStatistics;
 import java.net.URI;
@@ -24,6 +26,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -35,7 +38,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AlphaessDataCollector extends AbstractDataCollector {
+public class AlphaessCollector extends AbstractDataCollector implements BatteryService {
 
   private final RestTemplate restTemplate;
   private final AlphaessProperties alphaessProperties;
@@ -122,9 +125,7 @@ public class AlphaessDataCollector extends AbstractDataCollector {
     log.trace("Getting statistics on {} for {} on {}", uri, serial, date);
     LocalDateTime startDay = date.atStartOfDay();
     LocalDateTime endDay = date.atTime(LocalTime.MAX);
-    StatisticsRequestDto statisticsRequestDto = new StatisticsRequestDto(startDay, endDay,
-        LocalDate.now(), 0, serial,
-        "", true);
+    StatisticsRequestDto statisticsRequestDto = new StatisticsRequestDto(startDay, endDay, serial);
     HttpEntity<StatisticsRequestDto> request = new HttpEntity<>(statisticsRequestDto,
         buildHeaders(getOrRefreshAccessToken()));
     SticsByPeriodResponseEntity result = restTemplate.postForObject(uri, request,
@@ -146,6 +147,22 @@ public class AlphaessDataCollector extends AbstractDataCollector {
           }
         }
     );
+  }
 
+  @Override
+  public void setGridCharging(String identifier, LocalTime start, LocalTime end,
+      int maximumPercentageToCharge) {
+    EssSettingRequestDto settingRequestDto = new EssSettingRequestDto(identifier, true,
+        start, end, String.valueOf(maximumPercentageToCharge));
+    URI uri = buildUri(alphaessProperties.getEndpoints().getSettings());
+    log.trace("Posting settings to {} << {}", uri, settingRequestDto);
+
+    HttpEntity<EssSettingRequestDto> request = new HttpEntity<>(settingRequestDto,
+        buildHeaders(getOrRefreshAccessToken()));
+    ResponseEntity<Object> response = restTemplate.postForEntity(uri, request,
+        Object.class);
+    if (!response.getStatusCode().is2xxSuccessful()) {
+      throw new ExporterException(Level.ERROR, "Saving settings failed.");
+    }
   }
 }

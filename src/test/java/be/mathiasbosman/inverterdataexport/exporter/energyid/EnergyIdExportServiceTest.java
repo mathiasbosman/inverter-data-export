@@ -3,12 +3,11 @@ package be.mathiasbosman.inverterdataexport.exporter.energyid;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import be.mathiasbosman.inverterdataexport.PvStatisticStub;
-import be.mathiasbosman.inverterdataexport.collector.DataCollector;
+import be.mathiasbosman.inverterdataexport.domain.DataCollector;
 import be.mathiasbosman.inverterdataexport.domain.ExporterException;
 import be.mathiasbosman.inverterdataexport.exporter.energyid.EnergyIdProperties.EnergyIdMeter;
 import java.time.LocalDate;
@@ -75,7 +74,7 @@ class EnergyIdExportServiceTest {
 
     energyIdExportService.exportPvStatisticsForPeriod(INVERTER_ID_1, DATE_LAST_WEEK, DATE_NOW);
 
-    verify(webhookAdapter, times(1)).postReadings(any());
+    verify(webhookAdapter).postReadings(any());
   }
 
   @Test

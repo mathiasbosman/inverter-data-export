@@ -9,6 +9,7 @@ alphaess:
   base-url: "https://www.alphaess.com/api"
   endpoints:
     authentication: "/Account/Login"
+    settings: "/Account/CustomUseESSSetting"
     daily-stats: "/Power/SticsByPeriod"
   credentials:
     username: "foo"

@@ -24,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 public class AlphaessProperties {
 
   public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
+  public static final String TIME_FORMAT_PATTERN = "HH:mm";
   public static final String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
   public static final String PREFIX = "alphaess";
@@ -87,5 +88,10 @@ public class AlphaessProperties {
      */
     @NotNull
     private String dailyStats;
+    /**
+     * Settings endpoint
+     */
+    @NotNull
+    private String settings;
   }
 }
